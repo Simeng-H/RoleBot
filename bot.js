@@ -93,6 +93,18 @@ client.on('message', async msg => {
 
 });
 
+client.on('message', async msg => {
+    if (msg.channel.type !== 'dm') {
+        return
+    }
+    if (msg.content !== 'update') return;
+    if (msg.author.username !== "Simeng Hao") return;
+    let guild = (await client.guilds.fetch('750494025806643370'))
+    let members = guild.members.cache;
+    members.forEach((member, id) => {
+        client.emit('guildMemberUpdate', member,member)
+    })
+})
 
 // 2110
 client.on('guildMemberAdd', async (member) => {
