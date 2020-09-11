@@ -5,6 +5,7 @@ let load = () => {
     let file = fs.readFileSync('./asset/F20 CS2110 Cohorts.csv', 'utf-8');
     // console.log(file);
     let rows = parse(file, { columns: false, trim: true })
+    // console.log(rows)
     rows.forEach((row) => {
         let id = row[0].trim();
         if (id === "0") {
@@ -18,6 +19,7 @@ let load = () => {
 }
 
 load();
+// console.log(idToCohort['mtl2mr'])
 module.exports = idToCohort
 
 
