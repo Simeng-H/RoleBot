@@ -1,7 +1,15 @@
 const idToCohort = require('./idToCohort')
 const util = require('./util')
 const Discord = require('discord.js');
+const { extractComputingID } = require('./util');
 const client = new Discord.Client();
+
+
+
+const excludedIDs = [
+    'mtl2mr',
+    'mgb2gr'
+]
 
 // client.user.setUsername("RoleBot")
 
@@ -33,190 +41,116 @@ client.on('message', msg => {
 
 // show discrepencies in CS 2110
 client.on('message', async msg => {
-    if (msg.channel.type !== 'dm'){
+    if (msg.channel.type !== 'dm') {
         return
     }
-    if (msg.channel.type === 'dm') {
-        if (msg.content === 'show discrepencies' && (msg.author.username === "Simeng Hao")){
-            // console.log(await client.guilds)
-            let guild = (await client.guilds.fetch('750494025806643370'))
-            let members = guild.members.cache;
-            // console.log(members);
-            members.forEach((member, id) => {
-                let name = member.nickname;
-                if (name === null) {
-                    name = member.user.username
-                }
-                if (name === null) {
-                    return;
-                }
-                let cid = util.extractComputingID(name);
-                let cohort = idToCohort[cid]
-                if (cohort !== undefined) {
-                    cohort = cohort.toLowerCase();
-                }
-                // console.log(`${cid}:${cohort}`);
-                // guild.roles.cache.forEach((role)=>{
-                //     console.log(role.name)
-                // })
-                let role = guild.roles.cache.find(r => r.name === cohort);
-                if (role !== undefined) {
-                    // console.log(`${cid}:${role.name}`);
-                    // member.roles.add(role);
-                    // console.log(role);
-                    // console.log(member.roles.cache.has(role.id))
-                    if (!member.roles.cache.has(role.id)) {
-                        msg.reply(`${name}:${cohort}`)
-                        // console.log(name)
-                        // member.roles.cache.forEach((role)=>{
-                        //     console.log(role.name)
-                        //     console.log(role.id)
-                        // })
-                        // // console.log(cohort)
-                        // console.log(role.name)
-                        // console.log(role.id)
-                    }
-                }
-            })
-        }
-    }
-});
-
-client.on('ready', async () => {
-    // console.log(await client.guilds)
-    let guild = (await client.guilds.fetch('753830434097463356'))
-    let role = guild.roles.cache.find(r => r.name === "Test");
-    let members = guild.members.cache
-    // console.log(members);
-    members.forEach((member, id) => {
-        member.roles.add(role)
-    })
-})
-
-
-
-// client.on('ready', async () => {
-//     // console.log(await client.guilds)
-//     let guild = (await client.guilds.fetch('753830434097463356'))
-//     let role = guild.roles.cache.find(r => r.name === "Test");
-//     let members = guild.members.cache
-//     // console.log(members);
-//     members.forEach((member, id) => {
-//         member.roles.add(role)
-//     })
-// })
-
-// CS 2110
-client.on('ready', async () => {
-    // console.log(await client.guilds)
+    if (msg.content !== 'show discrepencies') return;
+    if (msg.author.username !== "Simeng Hao") return;
     let guild = (await client.guilds.fetch('750494025806643370'))
     let members = guild.members.cache;
-    // console.log(members);
-    members.forEach((member, id)=>{
-        let name = member.nickname;
-        if(name === null){
-            name = member.user.username
+    console.log("Discrepencies: ")
+    members.forEach((member, id) => {
+        const user = member.user;
+        let nickname = member.nickname
+        let username = user.username;
+
+        // if the nickname contains a computing id then use that
+        let computingID = extractComputingID(nickname);
+
+        // otherwise see if the usernames contains computing id
+        if (computingID === '') {
+            computingID = extractComputingID(username)
         }
-        if(name === null){
+
+        // if not then there's nothing we can do. 
+        if (computingID === '') {
             return;
         }
-        let cid = util.extractComputingID(name);
-        let cohort = idToCohort[cid]
-        if(cohort !== undefined){
-            cohort = cohort.toLowerCase();
-        }
-        // console.log(`${cid}:${cohort}`);
-        // guild.roles.cache.forEach((role)=>{
-        //     console.log(role.name)
-        // })
-        let role = guild.roles.cache.find(r => r.name === cohort);
-        if(role !== undefined){
-            // console.log(`${cid}:${role.name}`);
-            // member.roles.add(role);
-            // console.log(role);
-            // console.log(member.roles.cache.has(role.id))
-            // if(!member.roles.cache.has(role.id)){
-            //     console.log(name)
-            //     // member.roles.cache.forEach((role)=>{
-            //     //     console.log(role.name)
-            //     //     console.log(role.id)
-            //     // })
-            //     // // console.log(cohort)
-            //     // console.log(role.name)
-            //     // console.log(role.id)
-            // }
-        }
-    })
-})
 
-// 2110
-client.on('guildMemberAdd', (member)=>{
-    if(member.guild.id == "750494025806643370"){
-        const user = member.user;
-        user.send("Welcome to the CS 2110 Server! Please change your name to be in the format <First Name> <Last Name> (<Computing ID>) so I can assign you to your cohort.")
-        console.log(`a new member is here: ${user.username}`)
-    }
-})
+        // Or if we manually ignores it.
+        if (excludedIDs.includes(computingID)) {
+            return;
+        }
 
-// 2110 change nickname
-client.on('guildMemberUpdate', async (oldmbr, newmbr) => {
-    if (newmbr.guild.id == "750494025806643370") {
-        let guild = (await client.guilds.fetch('750494025806643370'))
-        if (oldmbr.nickname === newmbr.nickname) {
+        let cohort = idToCohort[computingID];
+
+        // we don't know what cohort the person is in.
+        if (!cohort) {
             return
         }
-        const member = newmbr
-        const user = member.user;
-        let name = member.nickname;
-        if (name === null) {
-            name = user.username
-        }
-        if (name === null) {
+
+        cohort = cohort.toLowerCase();
+        let role = guild.roles.cache.find(r => r.name === cohort);
+        if (role == undefined) {
             return;
         }
-        let cid = util.extractComputingID(name);
-        let cohort = idToCohort[cid]
-        if (cohort !== undefined) {
-            cohort = cohort.toLowerCase();
+        if (member.roles.cache.has(role.id)) {
+            return;
         }
-        // console.log(`${cid}:${cohort}`);
-        // guild.roles.cache.forEach((role)=>{
-        //     console.log(role.name)
-        // })
-        let role = guild.roles.cache.find(r => r.name === cohort);
-        if (role !== undefined) {
-            // console.log(`${cid}:${role.name}`);
-            member.roles.add(role);
-            console.log(`${name} has been added to cohort ${cohort}`);
-            // console.log(role);
-            // console.log(member.roles.cache.has(role.id))
-            // if (!member.roles.cache.has(role.id)) {
-            //     console.log(name)
-            //     // member.roles.cache.forEach((role)=>{
-            //     //     console.log(role.name)
-            //     //     console.log(role.id)
-            //     // })
-            //     // // console.log(cohort)
-            //     // console.log(role.name)
-            //     // console.log(role.id)
-            // }
-        }
-    }
+        console.log(`${computingID}, ${cohort}`)
+    })
+
+
+});
+
+
+// 2110
+client.on('guildMemberAdd', async (member) => {
+    if (member.guild.id !== "750494025806643370") return;
+
+    const user = member.user;
+    user.send("Welcome to the CS 2110 Server! Please change your name to be in the format <First Name> <Last Name> (<Computing ID>) so I can assign you to your cohort.")
+    console.log(`a new member is here: ${user.username}`)
+    client.emit('guildMemberUpdate', member,member)
 })
 
-// client.on('guildMemberAdd', (member)=>{
-//     if(member.guild.id == "753830434097463356"){
-//         const user = member.user;
-//         user.send("hi")
-//     }
-// })
+// master listener, everything else should trigger this.
+client.on('guildMemberUpdate', async (oldmbr, newmbr)=>{
+    if (newmbr.guild.id !== "750494025806643370"){
+        return;
+    }
+    let guild = (await client.guilds.fetch('750494025806643370'))
+    const member = newmbr
+    const user = member.user;
+    let nickname = member.nickname
+    let username = user.username;
 
-// client.on('guildMemberUpdate', async (oldmbr, newmbr)=>{
-//     if(newmbr.guild.id == "753830434097463356"){
-//         const user = newmbr.user;
-//         user.send("Welcome to the CS 2110 Server! Please change your name to be in the format <First Name> <Last Name> (<Computing ID>) so I can assign you to your cohort.")
-//     }
-// })
+    // if the nickname contains a computing id then use that
+    let computingID = extractComputingID(nickname);
+
+    // otherwise see if the usernames contains computing id
+    if(computingID === ''){
+        computingID = extractComputingID(username)
+    }
+
+    // if not then there's nothing we can do. 
+    if(computingID === ''){
+        return;
+    }
+
+    // Or if we manually ignores it.
+    if(excludedIDs.includes(computingID)){
+        return;
+    }
+
+    let cohort = idToCohort[computingID];
+
+    // we don't know what cohort the person is in.
+    if(!cohort){
+        return
+    }
+
+    cohort = cohort.toLowerCase();
+    let role = guild.roles.cache.find(r => r.name === cohort);
+    if (role == undefined) {
+        return;
+    }
+    if (member.roles.cache.has(role.id)){
+        return;
+    }
+    member.roles.add(role);
+    console.log(`${name} has been added to cohort ${cohort}`);
+})
 
 client.login('NzUzODI4ODY4MzY4MTA1NTM0.X1r31w.pjzJDPE1RALxtpxIlsIvm-9OBoU');
 
