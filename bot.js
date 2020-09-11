@@ -20,11 +20,66 @@ client.on('ready', () => {
 
 // });
 
+// process dm
 client.on('message', msg => {
+    if(msg.channel.type !== 'dm'){return}
+    if(msg.author.bot){return}
+    console.log(`new dm message from ${msg.author.username}: ${msg}`);
     if (msg.content === 'ping') {
         msg.reply('Pong!');
     }
-    console.log(`new message from ${msg.author.username}: ${msg}`);
+
+});
+
+// show discrepencies in CS 2110
+client.on('message', async msg => {
+    if (msg.channel.type !== 'dm'){
+        return
+    }
+    if (msg.channel.type === 'dm') {
+        if (msg.content === 'show discrepencies' && (msg.author.username === "Simeng Hao")){
+            // console.log(await client.guilds)
+            let guild = (await client.guilds.fetch('750494025806643370'))
+            let members = guild.members.cache;
+            // console.log(members);
+            members.forEach((member, id) => {
+                let name = member.nickname;
+                if (name === null) {
+                    name = member.user.username
+                }
+                if (name === null) {
+                    return;
+                }
+                let cid = util.extractComputingID(name);
+                let cohort = idToCohort[cid]
+                if (cohort !== undefined) {
+                    cohort = cohort.toLowerCase();
+                }
+                // console.log(`${cid}:${cohort}`);
+                // guild.roles.cache.forEach((role)=>{
+                //     console.log(role.name)
+                // })
+                let role = guild.roles.cache.find(r => r.name === cohort);
+                if (role !== undefined) {
+                    // console.log(`${cid}:${role.name}`);
+                    // member.roles.add(role);
+                    // console.log(role);
+                    // console.log(member.roles.cache.has(role.id))
+                    if (!member.roles.cache.has(role.id)) {
+                        msg.reply(`${name}:${cohort}`)
+                        // console.log(name)
+                        // member.roles.cache.forEach((role)=>{
+                        //     console.log(role.name)
+                        //     console.log(role.id)
+                        // })
+                        // // console.log(cohort)
+                        // console.log(role.name)
+                        // console.log(role.id)
+                    }
+                }
+            })
+        }
+    }
 });
 
 client.on('ready', async () => {
