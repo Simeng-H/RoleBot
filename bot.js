@@ -165,5 +165,3 @@ client.on('guildMemberUpdate', async (oldmbr, newmbr)=>{
 })
 
 client.login('NzUzODI4ODY4MzY4MTA1NTM0.X1r31w.pjzJDPE1RALxtpxIlsIvm-9OBoU');
-
-// 750494025806643370 : CS 2110
