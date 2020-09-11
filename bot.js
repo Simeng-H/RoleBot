@@ -24,7 +24,7 @@ client.on('message', msg => {
     if (msg.content === 'ping') {
         msg.reply('Pong!');
     }
-    console.log(`new message: ${msg}`);
+    console.log(`new message from ${msg.author.username}: ${msg}`);
 });
 
 client.on('ready', async () => {
@@ -99,7 +99,7 @@ client.on('guildMemberAdd', (member)=>{
     if(member.guild.id == "750494025806643370"){
         const user = member.user;
         user.send("Welcome to the CS 2110 Server! Please change your name to be in the format <First Name> <Last Name> (<Computing ID>) so I can assign you to your cohort.")
-        console.log('a new member is here.')
+        console.log(`a new member is here: ${user.username}`)
     }
 })
 
