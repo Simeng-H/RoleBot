@@ -126,6 +126,7 @@ client.on('guildMemberUpdate', async (oldmbr, newmbr)=>{
     const user = member.user;
     let nickname = member.nickname
     let username = user.username;
+    let name = nickname;
 
     // if the nickname contains a computing id then use that
     let computingID = extractComputingID(nickname);
@@ -133,6 +134,7 @@ client.on('guildMemberUpdate', async (oldmbr, newmbr)=>{
     // otherwise see if the usernames contains computing id
     if(computingID === ''){
         computingID = extractComputingID(username)
+        name = username
     }
 
     // if not then there's nothing we can do. 
