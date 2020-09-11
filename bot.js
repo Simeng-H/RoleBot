@@ -122,6 +122,7 @@ client.on('guildMemberUpdate', async (oldmbr, newmbr)=>{
         return;
     }
     let guild = (await client.guilds.fetch('750494025806643370'))
+    if(await oldmbr.roles.cache.size !== await newmbr.roles.cache.size) return;
     const member = newmbr
     const user = member.user;
     let nickname = member.nickname
