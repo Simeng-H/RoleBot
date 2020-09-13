@@ -5,7 +5,7 @@ let extractComputingID = (username)=>{
     let idRegex = /([A-z]{1,3}[0-9]([A-z]){1,3})/g;
     let id = username.match(idRegex)
     if(id !== null){
-        return id[0]
+        return id[0].toLowerCase()
     }
     return '';
 }
