@@ -1,5 +1,4 @@
 const idToCohort = require('./idToCohort')
-const util = require('./util')
 const Discord = require('discord.js');
 const { extractComputingID } = require('./util');
 const client = new Discord.Client();
@@ -7,8 +6,11 @@ const client = new Discord.Client();
 
 
 const excludedIDs = [
-    'mtl2mr',
-    'mgb2gr'
+    'mgb2gr',
+    'wpg6zmk',
+    'kh9yc',
+    'hkn5zmd',
+    'wkm7fy',
 ]
 
 // client.user.setUsername("RoleBot")
@@ -44,7 +46,7 @@ client.on('message', async msg => {
     if (msg.channel.type !== 'dm') {
         return
     }
-    if (msg.content !== 'show discrepencies') return;
+    if (msg.content !== 'show discrepancies') return;
     if (msg.author.username !== "Simeng Hao") return;
     let guild = (await client.guilds.fetch('750494025806643370'))
     let members = guild.members.cache;
